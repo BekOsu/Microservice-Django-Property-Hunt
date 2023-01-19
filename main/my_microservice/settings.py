@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     # apps
     "user",
     "todoList.apps.TodolistConfig",
+    "property",
     # packages
     "rest_framework",
     "drf_yasg",
