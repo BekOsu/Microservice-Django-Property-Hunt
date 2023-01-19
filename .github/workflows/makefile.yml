@@ -1,0 +1,73 @@
+name: Makefile CI
+
+on:
+  push:
+#    branches: [ "main" ]
+    branches: [ "master" ]
+
+  workflow_dispatch:
+      inputs:
+        version:
+          description: '1'
+          required: true
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: make build
+      run: make build
+
+    - name: make run
+      run: make run-d
+
+
+    - name: Format with black
+      run: |
+        pip install black
+        # format the files with black
+        black ./main
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 ./main --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 ./main --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Sort imports
+      run: |
+        pip install isort
+        # stop the build if there are Python syntax errors or undefined names
+        isort ./main
+        isort --check --diff ./main
+ 
+
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: make run-d
+
+    - name: Run check
+      run:  make test
+
+
+  deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+
+#       build docker image and push to the cloud
+    - name: Stop containers
+      if: always()
+      run: make stop
