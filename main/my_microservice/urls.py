@@ -15,11 +15,11 @@ router.register(r"groups", user_views.GroupViewSet)
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Django ASML",
+        title="Django Property",
         default_version="v1",
         description="API Docs",
         terms_of_service="https://www.google.com/policies/terms/",
-        contact=openapi.Contact(email="omerahmed41@gmail.com"),
+        contact=openapi.Contact(email="abubakersuliman@outlook.com"),
         license=openapi.License(name="MIT License"),
     ),
     public=True,
