@@ -58,11 +58,11 @@ services:
       - django_network
 
   rabbitmq:
-    image: rabbitmq:3-management-alpine
+    image: rabbitmq:3.8.25-management-alpine
     container_name: rabbitmq_django
-#    ports:
-#      - 5672:5672
-#      - 15672:15672
+    ports:
+      - 5672:5672
+      - 15672:15672
     volumes:
       - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
       - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
