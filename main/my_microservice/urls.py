@@ -50,6 +50,5 @@ urlpatterns = [
     # Admin
     path("admin/", admin.site.urls),
     #   todo_app
-    path("", include("todoList.urls")),
-    path("property/", include("property.urls")),
+    path("", include("property.urls")),
 ]
