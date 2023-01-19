@@ -1,0 +1,98 @@
+version: "3.9"
+   
+services:
+  db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    networks:
+      - django_network
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+  main:
+    build: ./main
+    command: bash -c "python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/main/main
+    ports:
+      - "8000:8000"
+    restart: always
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    networks:
+        - django_network
+    depends_on:
+      - db
+      - redis
+      - rabbitmq
+      - service-registry
+
+  notification_service:
+    build: ./notification_service
+    command: bash -c "python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8001"
+    volumes:
+      - .:/main/main
+    ports:
+      - "8001:8001"
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    networks:
+        - django_network
+    depends_on:
+      - db
+      - redis
+      - rabbitmq
+      - service-registry
+
+
+  redis:
+    image: redis:6-alpine
+    networks:
+      - django_network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq_django
+#    ports:
+#      - 5672:5672
+#      - 15672:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - django_network
+
+  nginx:
+    build: ./web
+    ports:
+      - 80:80
+    links:
+      - notification_service
+      - main
+    depends_on:
+      - notification_service
+      - main
+    networks:
+      - django_network
+
+  service-registry:
+    container_name:  service-registry
+    build:
+        context: ./service_registry
+        args:
+          JDK_VERSION: 17
+        dockerfile: Dockerfile
+    ports:
+      - 8761:8761
+    networks:
+      - django_network
+networks:
+  django_network:
+    name: django_network
