@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     # apps
     "user",
     "todoList.apps.TodolistConfig",
+    "PropEase",
     # packages
     "rest_framework",
     "drf_yasg",
