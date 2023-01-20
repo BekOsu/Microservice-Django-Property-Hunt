@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from property.models import Property
+from .models import Product, Property
 
 
 class PropertySerializer(serializers.ModelSerializer):
@@ -18,13 +18,31 @@ class PropertySerializer(serializers.ModelSerializer):
         )
 
 
-class PropertyPostSerializer(serializers.ModelSerializer):
+class ProductPostSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Property
+        model = Product
         fields = ("id", "content", "priority", "flag")
 
     def create(self, validated_data):
         """
         Create and return a new `Snippet` instance, given the validated data.
         """
-        return Property.objects.create(**validated_data)
+        return Product.objects.create(**validated_data)
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('id', 'name', 'description', 'price', 'category', 'brand', 'rating', 'created_at')
+
+
+class ProductSearchSerializer(serializers.Serializer):
+    category = serializers.CharField()
+    brand = serializers.CharField()
+    min_price = serializers.DecimalField(max_digits=5, decimal_places=2)
+    max_price = serializers.DecimalField(max_digits=5, decimal_places=2)
+    min_quantity = serializers.IntegerField()
+    max_quantity = serializers.IntegerField()
+    created_at = serializers.DateTimeField()
+    rating = serializers.FloatField()
+
