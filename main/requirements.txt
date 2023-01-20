@@ -9,3 +9,4 @@ py_eureka_client
 djangorestframework==3.13.1
 drf-yasg==1.20.0
 drf-yasg[validation]
+django-filter

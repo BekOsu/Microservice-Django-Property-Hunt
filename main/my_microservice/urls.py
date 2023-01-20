@@ -5,11 +5,15 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.contrib import admin
+from property.domain.views import ProductViewSet
+
 
 router = routers.DefaultRouter()
 router.register(r"users", user_views.UserViewSet)
 router.register(r"groups", user_views.GroupViewSet)
 
+product_router = routers.DefaultRouter()
+product_router.register(r'product', ProductViewSet)
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 
@@ -29,6 +33,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     # Auth-User app
     path("auth/", include(router.urls)),
+    path("product/", include(product_router.urls)),
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
     # Open API
     re_path(
