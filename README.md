@@ -41,7 +41,7 @@ Each service have their separate database completely decoupled. Nginx sits in fr
 ## Eureka Service:
 #### to see all Instances currently registered with Eureka
 * URL: http://localhost:8761
-<img width="1435" alt="Screen Shot 2022-08-22 at 2 02 48 AM" src="https://user-images.githubusercontent.com/15717941/185812782-7510305c-25b0-4ffe-b895-d34f88f0c4c8.png">
+<img width="1435" alt="Eureka" src="https://github.com/BekOsu/microservice-django-property-hunt/blob/master/main/static/images/Screenshot%20from%202023-01-20%2018-17-13.png">
 
 
 
@@ -50,7 +50,7 @@ Each service have their separate database completely decoupled. Nginx sits in fr
 * URL: http://localhost:15672
 * username: guest
 * password: guest
-<img width="1440" alt="rabbitmq" src="https://user-images.githubusercontent.com/15717941/183268850-8a03311f-9409-4f19-ba30-10be962da86d.png">
+<img width="1440" alt="rabbitmq" src="https://github.com/BekOsu/microservice-django-property-hunt/blob/master/main/static/images/Screenshot%20from%202023-01-20%2018-18-32.png">
 
 ## Docs:
 #### I used OpenAPI with swagger for API docs, also  followed Domain driven design with services Layer architecture to make it easy to understand the code
@@ -62,9 +62,9 @@ Each service have their separate database completely decoupled. Nginx sits in fr
 
 We used  swager open-API to auto document your APIs
 
-![Screen Shot 2022-07-04 at 2 21 23 PM](https://user-images.githubusercontent.com/15717941/177135399-ed503896-38f8-4fe0-a41f-1a769fe2d85f.png)
+![Screen Shot 2022-07-04 at 2 21 23 PM](https://github.com/BekOsu/microservice-django-property-hunt/blob/master/main/static/images/Screenshot%20from%202023-01-20%2018-21-44.png)
 
-![Screen Shot 2022-07-04 at 2 21 55 PM](https://user-images.githubusercontent.com/15717941/177135458-10933058-acf7-4b25-85cc-8171654363a9.png)
+![Screen Shot 2022-07-04 at 2 21 55 PM](https://github.com/BekOsu/microservice-django-property-hunt/blob/master/main/static/images/Screenshot%20from%202023-01-20%2018-20-02.png)
 
 ## Communications: 
 #### For Async communications I used rabbitmq, and for sync I used normal http calls (later on grpc will be good use).
@@ -78,7 +78,7 @@ We used  swager open-API to auto document your APIs
 ## CI/CD:
 #### Two steps: Build with tests, then Deploy.
 #### I commented the part of pushing the images to DockerHub then uploading it to the cloud but, you can easily uncomment that to make it work.
-<img width="1440" alt="Screen Shot 2022-08-21 at 6 37 42 PM" src="https://user-images.githubusercontent.com/15717941/185796382-343c44bb-7bbe-4ecc-9b89-49e727d37305.png">
+<img width="1440" alt="Screen Shot 2022-08-21 at 6 37 42 PM" src="https://github.com/BekOsu/microservice-django-property-hunt/blob/master/main/static/images/Screenshot%20from%202023-01-20%2018-24-02.png">
 
 ## Todo:
 #### the goal was to build the skeleton and base Architecture of the system, but these are Things need to be done when have more time: 
