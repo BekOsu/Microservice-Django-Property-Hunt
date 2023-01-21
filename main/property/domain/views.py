@@ -1,12 +1,14 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.generics import RetrieveAPIView
 from rest_framework.response import Response
-from rest_framework.views import APIView
 import logging
 import redis
 from my_microservice import settings
-from rest_framework import viewsets, status, generics
+from rest_framework import viewsets, status
 from ..models import Product
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.permissions import IsAuthenticated
+
 from ..filters import ProductFilter
 from drf_yasg.utils import swagger_auto_schema
 # Connect to our Redis instance
@@ -18,7 +20,9 @@ redis_instance = redis.StrictRedis(
 logger = logging.getLogger(__name__)
 
 
-class ProductSearchView(APIView):
+class ProductSearchView(RetrieveAPIView):
+    permission_classes = (IsAuthenticated,)
+
     @swagger_auto_schema(query_serializer=ProductSearchSerializer)
     def get(self, request, format=None):
         serializer = ProductSearchSerializer(data=request.query_params)
@@ -58,6 +62,7 @@ class ProductSearchView(APIView):
 
 
 class ProductViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
