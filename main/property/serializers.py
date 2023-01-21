@@ -37,12 +37,12 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class ProductSearchSerializer(serializers.Serializer):
-    category = serializers.CharField()
-    brand = serializers.CharField()
-    min_price = serializers.DecimalField(max_digits=5, decimal_places=2)
-    max_price = serializers.DecimalField(max_digits=5, decimal_places=2)
-    min_quantity = serializers.IntegerField()
-    max_quantity = serializers.IntegerField()
-    created_at = serializers.DateTimeField()
-    rating = serializers.FloatField()
+    category = serializers.CharField(required=False)
+    brand = serializers.CharField(required=False)
+    min_price = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
+    max_price = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
+    min_quantity = serializers.IntegerField(required=False)
+    max_quantity = serializers.IntegerField(required=False)
+    created_at = serializers.DateTimeField(required=False)
+    rating = serializers.FloatField(required=False)
 
