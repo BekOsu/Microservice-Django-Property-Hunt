@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Property(models.Model):
@@ -33,3 +34,11 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     valid_sort_fields = ['name', 'category', 'brand', 'rating', 'price', 'quantity', 'created_at']
+
+
+class Cart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
