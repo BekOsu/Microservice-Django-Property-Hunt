@@ -28,6 +28,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'django.contrib.auth.backends.SessionBackend',
+)
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -46,7 +51,7 @@ INSTALLED_APPS = [
     "drf_yasg",
     "django_q",
     'rest_framework_simplejwt',
-
+    'redis_cache',
 ]
 
 MIDDLEWARE = [
@@ -57,13 +62,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    'rest_framework.authentication.SessionAuthentication',
     'django.middleware.common.BrokenLinkEmailsMiddleware',
-    # pagination
-    'rest_framework.pagination.LimitOffsetPagination'
-    # jwt
-    'rest_framework_simplejwt.authentication.JWTAuthentication',
-
 ]
 
 ROOT_URLCONF = "my_microservice.urls"
@@ -134,6 +133,22 @@ STATIC_URL = "/static/"
 
 REDIS_HOST = "redis"
 REDIS_PORT = 6379
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = "default"
+SESSION_COOKIE_NAME = 'sessionid'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        },
+        "KEY_PREFIX": "my_microservice"
+    }
+}
 
 # settings.py example
 Q_CLUSTER = {
