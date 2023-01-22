@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Property
+from .models import Product, Property, Cart
 
 
 class PropertySerializer(serializers.ModelSerializer):
@@ -46,3 +46,8 @@ class ProductSearchSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField(required=False)
     rating = serializers.FloatField(required=False)
 
+
+class CartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cart
+        fields = ('id', 'user', 'product', 'quantity', 'created_at')
