@@ -3,6 +3,7 @@ psycopg2-binary==2.9.3
 Pillow>=9.2.0
 redis==3.5.3
 django-redis
+django-redis-cache
 django-q
 pika
 py_eureka_client
@@ -11,3 +12,6 @@ drf-yasg==1.20.0
 drf-yasg[validation]
 django-filter
 djangorestframework-simplejwt
+mysqlclient
+mysql-connector-python
+pytest
