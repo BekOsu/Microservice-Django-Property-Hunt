@@ -1,5 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import RetrieveAPIView
+from rest_framework.mixins import CreateModelMixin
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 import logging
 import redis
@@ -20,8 +22,17 @@ redis_instance = redis.StrictRedis(
 logger = logging.getLogger(__name__)
 
 
+class CustomCreateModelMixin(CreateModelMixin):
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+
 class ProductSearchView(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
+    pagination_class = LimitOffsetPagination
+    search_fields = (
+        'category', 'brand', 'min_price', 'max_price', 'min_quantity', 'max_quantity', 'created_at', 'rating')
+    ordering_fields = ('name', 'category', 'brand', 'rating', 'price', 'quantity', 'created_at')
 
     @swagger_auto_schema(query_serializer=ProductSearchSerializer)
     def get(self, request, format=None):
@@ -55,16 +66,43 @@ class ProductSearchView(RetrieveAPIView):
             if rating:
                 queryset = queryset.filter(rating=rating)
 
-            serializer = ProductSerializer(queryset, many=True)
-            return Response(serializer.data)
+            sort_by = self.request.query_params.get('sort_by')
+            if sort_by:
+                if sort_by and hasattr(Product, sort_by):
+                    queryset = queryset.order_by(sort_by)
+                else:
+                    return Response({"detail": "Invalid 'sort_by' field"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                queryset = queryset.order_by('name')
+
+            paginator = LimitOffsetPagination()
+            results = paginator.paginate_queryset(queryset, request)
+
+            serializer = ProductSerializer(results, many=True)
+            return paginator.get_paginated_response(serializer.data)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ProductViewSet(viewsets.ModelViewSet):
+class ProductViewSet(CustomCreateModelMixin, viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
     filter_class = ProductFilter
-    search_fields = ('name', 'category', 'brand', 'rating')
+    pagination_class = LimitOffsetPagination
+    search_fields = (
+        'category', 'brand', 'min_price', 'max_price', 'min_quantity', 'max_quantity', 'created_at', 'rating')
+    ordering_fields = ('name', 'category', 'brand', 'rating', 'price', 'quantity', 'created_at')
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        sort_by = self.request.query_params.get('sort_by')
+        if sort_by:
+            if sort_by in ('name', 'category', 'brand', 'rating', 'price', 'quantity', 'created_at'):
+                queryset = queryset.order_by(sort_by)
+            else:
+                return Response({"detail": "Invalid 'sort_by' field"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            queryset = queryset.order_by('name')
+        return queryset
