@@ -15,7 +15,7 @@ spec:
         app: django
     spec:
       containers:
-        - image: postgres:alpine3.16
+        - image: mysql
           name: django
           ports:
             - containerPort: 8000

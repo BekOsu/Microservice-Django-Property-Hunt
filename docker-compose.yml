@@ -2,15 +2,18 @@ version: "3.9"
    
 services:
   db:
-    image: postgres
+    image: mysql
     volumes:
-      - ./data/db:/var/lib/postgresql/data
+      - ./data/db:/var/lib/mysql
     networks:
       - django_network
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - MYSQL_DATABASE=mydatabase
+      - MYSQL_USER=mydatabaseuser
+      - MYSQL_PASSWORD=mypassword
+      - MYSQL_ROOT_PASSWORD=myrootpassword
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
 
   main:
     build: ./main
@@ -21,9 +24,12 @@ services:
       - "8000:8000"
     restart: always
     environment:
-      - POSTGRES_NAME=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - MYSQL_DATABASE=mydatabase
+      - MYSQL_USER=mydatabaseuser
+      - MYSQL_PASSWORD=mypassword
+      - MYSQL_ROOT_PASSWORD=myrootpassword
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
     networks:
         - django_network
     depends_on:
@@ -40,9 +46,12 @@ services:
     ports:
       - "8001:8001"
     environment:
-      - POSTGRES_NAME=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - MYSQL_DATABASE=mydatabase
+      - MYSQL_USER=mydatabaseuser
+      - MYSQL_PASSWORD=mypassword
+      - MYSQL_ROOT_PASSWORD=myrootpassword
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
     networks:
         - django_network
     depends_on:
