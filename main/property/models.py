@@ -31,3 +31,5 @@ class Product(models.Model):
     brand = models.CharField(max_length=255)
     rating = models.FloatField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+    valid_sort_fields = ['name', 'category', 'brand', 'rating', 'price', 'quantity', 'created_at']
