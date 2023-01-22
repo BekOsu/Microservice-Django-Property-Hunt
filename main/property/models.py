@@ -25,10 +25,14 @@ class Property(models.Model):
 
 
 class Product(models.Model):
+    CATEGORY_CHOICES = (
+        ('residential', 'Residential'),
+        ('commercial', 'Commercial')
+    )
     name = models.CharField(max_length=255)
     description = models.TextField()
     price = models.DecimalField(max_digits=5, decimal_places=2)
-    category = models.CharField(max_length=255)
+    category = models.CharField(max_length=255, choices=CATEGORY_CHOICES)
     brand = models.CharField(max_length=255)
     rating = models.FloatField()
     created_at = models.DateTimeField(auto_now_add=True)

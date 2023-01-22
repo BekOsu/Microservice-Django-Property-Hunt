@@ -37,7 +37,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class ProductSearchSerializer(serializers.Serializer):
-    category = serializers.CharField(required=False)
+    category = serializers.ChoiceField(choices=Product.CATEGORY_CHOICES, required=False)
     brand = serializers.CharField(required=False)
     min_price = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
     max_price = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
