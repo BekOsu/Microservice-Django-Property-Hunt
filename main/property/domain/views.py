@@ -7,14 +7,13 @@ import logging
 import redis
 from my_microservice import settings
 from rest_framework import viewsets, status
-from ..models import Product
+from ..models import Product, Cart
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
-
 from ..filters import ProductFilter
 from drf_yasg.utils import swagger_auto_schema
 # Connect to our Redis instance
-from ..serializers import ProductSearchSerializer, ProductSerializer
+from ..serializers import ProductSearchSerializer, ProductSerializer, CartSerializer
 
 redis_instance = redis.StrictRedis(
     host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0
@@ -29,7 +28,7 @@ class CustomCreateModelMixin(CreateModelMixin):
 
 class ProductSearchView(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
-    pagination_class = LimitOffsetPagination
+    serializer_class = ProductSearchSerializer
     search_fields = (
         'category', 'brand', 'min_price', 'max_price', 'min_quantity', 'max_quantity', 'created_at', 'rating')
     ordering_fields = ('name', 'category', 'brand', 'rating', 'price', 'quantity', 'created_at')
@@ -90,11 +89,11 @@ class ProductViewSet(CustomCreateModelMixin, viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
     filter_class = ProductFilter
-    pagination_class = LimitOffsetPagination
     search_fields = (
         'category', 'brand', 'min_price', 'max_price', 'min_quantity', 'max_quantity', 'created_at', 'rating')
     ordering_fields = ('name', 'category', 'brand', 'rating', 'price', 'quantity', 'created_at')
 
+    @swagger_auto_schema(query_serializer=ProductSerializer)
     def get_queryset(self):
         queryset = super().get_queryset()
         sort_by = self.request.query_params.get('sort_by')
@@ -106,3 +105,71 @@ class ProductViewSet(CustomCreateModelMixin, viewsets.ModelViewSet):
         else:
             queryset = queryset.order_by('name')
         return queryset
+
+
+class CartViewSet(viewsets.ViewSet):
+    permission_classes = (IsAuthenticated,)
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
+
+    @swagger_auto_schema(query_serializer=CartSerializer)
+    def view_cart(self, request):
+        """
+        Retrieve the cart items of the authenticated user from the session.
+        """
+        cart_items = request.session.get('cart_items', {})
+        return Response(cart_items)
+
+    @swagger_auto_schema(query_serializer=CartSerializer)
+    def add_to_cart(self, request):
+        """
+        Add a product to the cart of the authenticated user in the session.
+        """
+        product_id = request.data.get('product_id')
+        quantity = request.data.get('quantity', 1)
+        cart_items = request.session.get('cart_items', {})
+
+        if product_id in cart_items:
+            cart_items[product_id]['quantity'] += quantity
+        else:
+            product = Product.objects.get(id=product_id)
+            cart_items[product_id] = {
+                'name': product.name,
+                'price': product.price,
+                'quantity': quantity
+            }
+
+        request.session['cart_items'] = cart_items
+        return Response(cart_items)
+
+    @swagger_auto_schema(query_serializer=CartSerializer)
+    def update_cart(self, request):
+
+        """
+        Update the quantity of a cart item for the authenticated user in the session.
+        """
+        product_id = request.data.get('product_id')
+        quantity = request.data.get('quantity', 1)
+        cart_items = request.session.get('cart_items', {})
+
+        if product_id in cart_items:
+            cart_items[product_id]['quantity'] = quantity
+            request.session['cart_items'] = cart_items
+            return Response(cart_items)
+        else:
+            return Response({"error": "Product not found in cart"}, status=status.HTTP_404_NOT_FOUND)
+
+    @swagger_auto_schema(query_serializer=CartSerializer)
+    def remove_from_cart(self, request):
+        """
+        Remove a cart item for the authenticated user from the session.
+        """
+        product_id = request.data.get('product_id')
+        cart_items = request.session.get('cart_items', {})
+
+        if product_id in cart_items:
+            del cart_items[product_id]
+            request.session['cart_items'] = cart_items
+            return Response(cart_items)
+        else:
+            return Response({"detail": "Item not found in cart"}, status=status.HTTP_404_NOT_FOUND)
