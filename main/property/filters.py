@@ -7,6 +7,8 @@ class ProductFilter(filters.FilterSet):
     max_price = filters.NumberFilter(field_name="price", lookup_expr='lte')
     min_quantity = filters.NumberFilter(field_name="quantity", lookup_expr='gte')
     max_quantity = filters.NumberFilter(field_name="quantity", lookup_expr='lte')
+    category = filters.CharFilter(field_name="category", lookup_expr='exact')
+    brand = filters.CharFilter(field_name="brand", lookup_expr='exact')
     rating = filters.NumberFilter(field_name="rating")
     created_at = filters.DateTimeFilter(field_name='created_at', lookup_expr='date')
 
