@@ -92,7 +92,7 @@ class ProductSearchView(RetrieveAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ProductViewSet(CustomCreateModelMixin, viewsets.ModelViewSet):
+class ProductViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -111,10 +111,15 @@ class ProductViewSet(CustomCreateModelMixin, viewsets.ModelViewSet):
         return queryset
 
 
-class CartViewSet(viewsets.ViewSet):
+class CartViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return CartItemSerializer
+        return self.serializer_class
 
     @swagger_auto_schema(query_serializer=CartSerializer)
     def list(self, request):
@@ -130,12 +135,12 @@ class CartViewSet(viewsets.ViewSet):
             return Response({"detail": "Cart not found for user"})
 
     @swagger_auto_schema(query_serializer=CartItemSerializer)
-    def create(self, request):
+    def create(self, request, format=None):
         """
         Add a product to the cart of the authenticated user.
         """
-        product_id = request.data.get('product_id')
-        quantity = request.data.get('quantity', 1)
+        product_id = request.query_params.get('product')
+        quantity = request.query_params.get('quantity', 1)
         try:
             product = Product.objects.get(id=product_id)
         except Product.DoesNotExist:
@@ -155,13 +160,13 @@ class CartViewSet(viewsets.ViewSet):
         serializer = CartItemSerializer(cart_item)
         return Response(serializer.data)
 
-    @swagger_auto_schema(query_serializer=CartSerializer)
-    def update(self, request):
+    @swagger_auto_schema(query_serializer=CartItemSerializer)
+    def update(self, request, pk, format=None):
         """
         Update the quantity of a cart item for the authenticated user.
         """
-        product_id = request.data.get('product_id')
-        quantity = request.data.get('quantity', 1)
+        product_id = request.query_params.get('product')
+        quantity = request.query_params.get('quantity', 1)
         try:
             product = Product.objects.get(id=product_id)
         except Product.DoesNotExist:
@@ -181,13 +186,15 @@ class CartViewSet(viewsets.ViewSet):
             return Response({"detail": "Cart not found for user"})
 
     @swagger_auto_schema(query_serializer=CartSerializer)
-    def destroy(self, request):
+    def destroy(self, request, pk, format=None):
         """
         Remove a cart item for the authenticated user.
         """
-        product_id = request.data.get('product_id')
+        user = request.query_params.get('user')
+        if not user == str(request.user.id):
+            return Response('Not allowed')
         try:
-            product = Product.objects.get(id=product_id)
+            product = Product.objects.get(id=pk)
         except Product.DoesNotExist:
             return Response({"detail": "Product not found"})
 
