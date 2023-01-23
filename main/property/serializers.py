@@ -21,7 +21,7 @@ class PropertySerializer(serializers.ModelSerializer):
 class ProductPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ("id", "content", "priority", "flag")
+        fields = '__all__'
 
     def create(self, validated_data):
         """
@@ -33,7 +33,7 @@ class ProductPostSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ('id', 'name', 'description', 'price', 'category', 'brand', 'rating', 'created_at')
+        fields = '__all__'
 
 
 class ProductSearchSerializer(serializers.Serializer):
@@ -50,10 +50,10 @@ class ProductSearchSerializer(serializers.Serializer):
 class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
-        fields = ('id', 'user', 'created_at', 'updated_at')
+        fields = '__all__'
 
 
 class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
-        fields = ('id', 'cart', 'product', 'quantity', 'created_at', 'updated_at')
+        fields = '__all__'

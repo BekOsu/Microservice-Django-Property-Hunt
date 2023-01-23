@@ -33,6 +33,7 @@ class CustomCreateModelMixin(CreateModelMixin):
 class ProductSearchView(RetrieveAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = ProductSearchSerializer
+    queryset = Product.objects.all()
     search_fields = (
         'category', 'brand', 'min_price', 'max_price', 'min_quantity', 'max_quantity', 'created_at', 'rating')
     ordering_fields = ('name', 'category', 'brand', 'rating', 'price', 'created_at')
@@ -95,11 +96,6 @@ class ProductViewSet(CustomCreateModelMixin, viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    filter_backends = (DjangoFilterBackend, SearchFilter, OrderingFilter)
-    filter_class = ProductFilter
-    search_fields = (
-        'category', 'brand', 'min_price', 'max_price', 'min_quantity', 'max_quantity', 'created_at', 'rating')
-    ordering_fields = ('name', 'category', 'brand', 'rating', 'price', 'quantity', 'created_at')
 
     @swagger_auto_schema(query_serializer=ProductSerializer)
     def get_queryset(self):
