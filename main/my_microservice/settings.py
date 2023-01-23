@@ -96,6 +96,17 @@ DATABASES = {
         'PASSWORD': 'mypassword',
         'HOST': 'db',
         'PORT': '3306',
+    },
+    'TEST': {
+        'NAME': 'test',
+    },
+    'test': {
+        'ENGINE': 'mysql.connector.django',
+        'NAME': 'test_mydatabase',
+        'USER': 'mydatabaseuser',
+        'PASSWORD': 'mypassword',
+        'HOST': 'db',
+        'PORT': '3306',
     }
 }
 
