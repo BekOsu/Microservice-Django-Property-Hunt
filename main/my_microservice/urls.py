@@ -7,7 +7,6 @@ from drf_yasg import openapi
 from django.contrib import admin
 from property.domain.views import ProductViewSet, CartViewSet
 
-
 router = routers.DefaultRouter()
 router.register(r"users", user_views.UserViewSet)
 router.register(r"groups", user_views.GroupViewSet)

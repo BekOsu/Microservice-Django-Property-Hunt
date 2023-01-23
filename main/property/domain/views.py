@@ -7,13 +7,17 @@ import logging
 import redis
 from my_microservice import settings
 from rest_framework import viewsets, status
-from ..models import Product, Cart
+from ..models import Product, Cart, CartItem
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from ..filters import ProductFilter
 from drf_yasg.utils import swagger_auto_schema
 # Connect to our Redis instance
-from ..serializers import ProductSearchSerializer, ProductSerializer, CartSerializer
+from ..serializers import (
+    ProductSearchSerializer,
+    ProductSerializer,
+    CartSerializer,
+    CartItemSerializer)
 
 redis_instance = redis.StrictRedis(
     host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0
@@ -31,13 +35,17 @@ class ProductSearchView(RetrieveAPIView):
     serializer_class = ProductSearchSerializer
     search_fields = (
         'category', 'brand', 'min_price', 'max_price', 'min_quantity', 'max_quantity', 'created_at', 'rating')
-    ordering_fields = ('name', 'category', 'brand', 'rating', 'price', 'quantity', 'created_at')
+    ordering_fields = ('name', 'category', 'brand', 'rating', 'price', 'created_at')
 
     @swagger_auto_schema(query_serializer=ProductSearchSerializer)
     def get(self, request, format=None):
         serializer = ProductSearchSerializer(data=request.query_params)
         if serializer.is_valid():
             queryset = Product.objects.all()
+
+            name = serializer.validated_data.get('name')
+            if name:
+                queryset = queryset.filter(name__icontains=name)
 
             category = serializer.validated_data.get('category')
             if category:
@@ -113,63 +121,88 @@ class CartViewSet(viewsets.ViewSet):
     serializer_class = CartSerializer
 
     @swagger_auto_schema(query_serializer=CartSerializer)
-    def view_cart(self, request):
+    def list(self, request):
         """
-        Retrieve the cart items of the authenticated user from the session.
+        Retrieve the cart and its items of the authenticated user.
         """
-        cart_items = request.session.get('cart_items', {})
-        return Response(cart_items)
+        user_cart = Cart.objects.filter(user=request.user)
+        if user_cart.exists():
+            cart_items = CartItem.objects.filter(cart=user_cart.first())
+            serializer = CartItemSerializer(cart_items, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({"detail": "Cart not found for user"})
 
     @swagger_auto_schema(query_serializer=CartSerializer)
-    def add_to_cart(self, request):
+    def create(self, request):
         """
-        Add a product to the cart of the authenticated user in the session.
+        Add a product to the cart of the authenticated user.
         """
         product_id = request.data.get('product_id')
         quantity = request.data.get('quantity', 1)
-        cart_items = request.session.get('cart_items', {})
-
-        if product_id in cart_items:
-            cart_items[product_id]['quantity'] += quantity
-        else:
+        try:
             product = Product.objects.get(id=product_id)
-            cart_items[product_id] = {
-                'name': product.name,
-                'price': product.price,
-                'quantity': quantity
-            }
+        except Product.DoesNotExist:
+            return Response({"detail": "Product not found"})
 
-        request.session['cart_items'] = cart_items
-        return Response(cart_items)
+        user_cart = Cart.objects.filter(user=request.user)
+        if user_cart.exists():
+            cart = user_cart.first()
+        else:
+            cart = Cart.objects.create(user=request.user)
+
+        cart_item = CartItem.objects.create(
+            cart=cart,
+            product=product,
+            quantity=quantity
+        )
+        serializer = CartItemSerializer(cart_item)
+        return Response(serializer.data)
 
     @swagger_auto_schema(query_serializer=CartSerializer)
-    def update_cart(self, request):
-
+    def update(self, request):
         """
-        Update the quantity of a cart item for the authenticated user in the session.
+        Update the quantity of a cart item for the authenticated user.
         """
         product_id = request.data.get('product_id')
         quantity = request.data.get('quantity', 1)
-        cart_items = request.session.get('cart_items', {})
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response({"detail": "Product not found"})
 
-        if product_id in cart_items:
-            cart_items[product_id]['quantity'] = quantity
-            request.session['cart_items'] = cart_items
-            return Response(cart_items)
+        user_cart = Cart.objects.filter(user=request.user)
+        if user_cart.exists():
+            cart = user_cart.first()
+            cart_item = CartItem.objects.filter(cart=cart, product=product)
+            if cart_item.exists():
+                cart_item.update(quantity=quantity)
+                serializer = CartItemSerializer(cart_item.first())
+                return Response(serializer.data)
+            else:
+                return Response({"detail": "Item not found in cart"})
         else:
-            return Response({"error": "Product not found in cart"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "Cart not found for user"})
 
     @swagger_auto_schema(query_serializer=CartSerializer)
-    def remove_from_cart(self, request):
+    def destroy(self, request):
         """
-        Remove a cart item for the authenticated user from the session.
+        Remove a cart item for the authenticated user.
         """
         product_id = request.data.get('product_id')
-        cart_items = request.session.get('cart_items', {})
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response({"detail": "Product not found"})
 
-        if product_id in cart_items:
-            del cart_items[product_id]
-            request.session['cart_items'] = cart_items
-            return Response(cart_items)
+        user_cart = Cart.objects.filter(user=request.user)
+        if user_cart.exists():
+            cart = user_cart.first()
+            try:
+                cart_item = CartItem.objects.get(cart=cart, product=product)
+                cart_item.delete()
+                return Response({"detail": "Product removed from cart"})
+            except CartItem.DoesNotExist:
+                return Response({"detail": "Product not found in cart"})
         else:
-            return Response({"detail": "Item not found in cart"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "Cart not found for user"})

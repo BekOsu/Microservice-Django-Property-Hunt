@@ -18,7 +18,7 @@ clean:
 	docker-compose down --remove-orphans --volumes
 
 setup:
-	make build; make run-d; make makemigrations; make migrate;  make create_superuser; make logs_web
+	make build; make run-d; make makemigrations; make migrate;
 
 build:
 	docker-compose build
