@@ -129,7 +129,7 @@ class CartViewSet(viewsets.ViewSet):
         else:
             return Response({"detail": "Cart not found for user"})
 
-    @swagger_auto_schema(query_serializer=CartSerializer)
+    @swagger_auto_schema(query_serializer=CartItemSerializer)
     def create(self, request):
         """
         Add a product to the cart of the authenticated user.
