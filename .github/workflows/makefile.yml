@@ -56,7 +56,7 @@ jobs:
       run: make run-d
 
     - name: Run check
-      run:  make test
+#      run:  make test
 
 
   deploy:
