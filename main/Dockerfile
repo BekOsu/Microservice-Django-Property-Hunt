@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   curl=* \
   libcurl4-openssl-dev=* \
   libssl-dev=* \
+  libssl1.1 \
   unzip=* \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
