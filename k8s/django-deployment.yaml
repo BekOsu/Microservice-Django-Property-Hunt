@@ -2,21 +2,39 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: django-app
-  labels:
-    app: django
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
-      app: django
+      app: django-app
   template:
     metadata:
       labels:
-        app: django
+        app: django-app
     spec:
       containers:
-        - image: mysql
-          name: django
-          ports:
-            - containerPort: 8000
-              name: gunicorn
+      - name: django-app
+        image: my-django-app:latest
+        command: ["gunicorn", "my_django_app.wsgi:application", "-b", "0.0.0.0:8000", "--workers", "3"]
+        ports:
+        - containerPort: 8000
+        env:
+        - name: MYSQL_DATABASE
+          value: "mydatabase"
+        - name: MYSQL_USER
+          value: "mydatabaseuser"
+        - name: MYSQL_PASSWORD
+          value: "mypassword"
+        - name: MYSQL_ROOT_PASSWORD
+          value: "myrootpassword"
+        - name: MYSQL_HOST
+          value: "db"
+        - name: MYSQL_PORT
+          value: "3306"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "500m"
+          limits:
+            memory: "512Mi"
+            cpu: "1000m"
